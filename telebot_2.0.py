@@ -1,4 +1,5 @@
 import datetime
+import db_libary
 import requests
 from bs4 import BeautifulSoup
 import time
@@ -11,6 +12,7 @@ from mysql.connector import Error
 BOT_TOKEN = "6108637814:AAFSs4JhYcgAD0IQ42rm61ttHS9WQ4ib0F4"
 
 class User:
+
     chat_ids_ = []
     golesh_count = 0
 
@@ -25,38 +27,12 @@ class User:
         User.golesh_count += 1
 
 
+staion_to_db = {'בת גלים כנסיה': 'bat_galim', 'בצת': 'bezet', "שדות ים": 'sdot_yam', 'עכו': 'ako',
+                    'עתלית המבצר': 'atlit', 'שבי ציון': 'shavie_zion',
+                    'נמל חדרה': 'hedera', 'שרונה': 'sarona', "כנרת מגדל": 'migdal', 'כנרת כפר נחום': 'kfar_nahom',
+                    'כנרת בית צידה': 'beit_zida', 'כנרת מצוף טבחה': 'tabcha'}
 list_of_station = ['כנרת בית צידה', 'כנרת מגדל', 'בת גלים כנסיה', 'כנרת כפר נחום', 'כנרת מצוף טבחה', 'שרונה', 'בצת', 'נמל חדרה', 'עתלית המבצר', 'עכו', 'שבי ציון', 'שדות ים']
 list_of_golshim = []
-
-def db_update(chat_id, first_name, station_to_get_update, wind_to_alert_knots, wind_to_alert_max):
-    # try to run the block of code
-    try:
-
-        # establishing the connection
-        conn = mysql.connector.connect(
-            user='root', password='Uri0524734764', host='127.0.0.1', database='windbot_db')
-
-        # open cursor, define and run query, fetch results
-        cursor = conn.cursor()
-        # Preparing SQL query to INSERT a record into the database.
-        sql = "INSERT INTO users_reg(id, first_name, station, wind, wind_max )" \
-              "VALUES (%s, %s, %s, %s, %s)"
-        staff = (chat_id, first_name, str(station_to_get_update), wind_to_alert_knots, wind_to_alert_max)
-
-        try:
-                # Executing the SQL command
-            cursor.execute(sql, staff)
-                # Commit your changes in the database
-            conn.commit()
-                # close the cursor and database connection
-            cursor.close()
-
-        except:
-            print('a problem happend when we try to insert '+str(first_name)+ ' to the new_db')
-
-    # catch exception and print error message
-    except Error as err:
-        print('Error message: ' + err.msg)
 
 def db_update_del(chat_id):
     # try to run the block of code
@@ -67,11 +43,9 @@ def db_update_del(chat_id):
         # open cursor, define and run query, fetch results
         cursor = conn.cursor()
         # Preparing SQL query to INSERT a record into the database.
-        sql = "DELETE FROM users_reg " \
+        sql = "DELETE FROM users" \
               "WHERE id ='%s'"
-        staff = ([chat_id])
-
-        #try:
+        staff = (chat_id,)
             # Executing the SQL command
         cursor.execute(sql, staff)
             # Commit your changes in the database
@@ -79,58 +53,24 @@ def db_update_del(chat_id):
              # close the cursor and database connection
         cursor.close()
 
-        #except:
-         #   print('a problem happend when we try to delete '+str(chat_id)+ ' from the users_reg db')
-
+        return True
     # catch exception and print error message
     except Error as err:
-        print('Error message: ' + err.msg)
+        print('db_update_del - Error message: ' + err.msg)
+        return False
 
 
-def db_get():
-    # try to run the block of code
-    try:
-
-        # establishing the connection
-        conn = mysql.connector.connect(
-            user='root', password='Uri0524734764', host='127.0.0.1', database='windbot_db')
-
-        # open cursor, define and run query, fetch results
-        cursor = conn.cursor()
-        # Preparing SQL query to INSERT a record into the database.
-        sql = "SELECT id FROM users_reg"
-           # Executing the SQL command
-        cursor.execute(sql)
-        result = cursor.fetchall()
-        final_result = []
-        for item in result:
-            item = str(item)
-            final_result.append(item)
-        # close the cursor and database connection
-        cursor.close()
-        conn.close()
-        return final_result
-    # catch exception and print error message
-    except Error as err:
-        print('Error message: ' + err.msg)
-        db_get()
-
-
+sql = "SELECT id FROM users"
 users_dic = {}
 bot = telebot.TeleBot(BOT_TOKEN)
 
-
-# make a list of all the ids of users that allready register to the servise
-users_reg_id_list =[]
-for id in db_get():
-    string = id
+for id in db_libary.db_get(sql = "SELECT id FROM users"):
+    string = str(id)
 # Remove non-digit characters using regular expressions
     chat_id = re.sub(r'\D', '', string)
-    users_reg_id_list.append(chat_id)
     users_dic[int(chat_id)] = User(user_stage=5, chat_id=int(chat_id), first_name=300,
                               wind_to_alert_knots=300, wind_to_alert_max=300, station_to_get_update=[])
 
-print(User.chat_ids_)
 @bot.message_handler(content_types=['text'])
 def welcome(message):
 
@@ -140,7 +80,7 @@ def welcome(message):
     print(chat_id)
     if chat_id not in users_dic.keys():
         print('as')
-        bot.send_message(chat_id, text='ברוכים הבאים לווינד בוט להרשמה לחץ כן')
+        bot.send_message(chat_id, text='ברוכים הבאים לווינד בוט להרשמה תכתוב כן')
         users_dic[chat_id] = User(user_stage=0, chat_id=chat_id, first_name=first_name,
                                             wind_to_alert_knots=0, wind_to_alert_max=0, station_to_get_update= [])
 
@@ -182,16 +122,27 @@ def welcome(message):
         if message.text == 'סיימתי':
             stations = set(user.station_to_get_update)
             user.station_to_get_update = list(stations)
-            user.user_stage = 5
-            bot.send_message(chat_id, text='תהליך ההרשמה הסתיים בהצלחה, מהיום תקבל עדכוני רוח!')
-            db_update(chat_id= chat_id, first_name=first_name, station_to_get_update=user.station_to_get_update, wind_to_alert_knots=user.wind_to_alert_knots, wind_to_alert_max=user.wind_to_alert_max)
+            new_list = []
+            for station in user.station_to_get_update:
+                station = staion_to_db[station]
+                new_list.append(station)
+            print(new_list)
+            if db_libary.insert_numbers(user_id=chat_id, user_name=first_name, station_list=new_list,
+            wind_to_alert_knots=user.wind_to_alert_knots, wind_to_alert_max=user.wind_to_alert_max) \
+            and db_libary.db_update_get_mes(chat_id=chat_id, staion_name='id'):
+                user.user_stage = 5
+                bot.send_message(chat_id, text='תהליך ההרשמה הסתיים בהצלחה, מהיום תקבל עדכוני רוח!')
+
         elif message.text in list_of_station:
             user.station_to_get_update.append(message.text)
 
     elif user.user_stage == 5:
         if message.text == '_delete_':
-            del users_dic[chat_id]
-            db_update_del(chat_id)
+            if db_libary.delete_row_by_id(chat_id, table_name='users'):
+                db_libary.delete_row_by_id(chat_id, table_name='station_get_mes')
+                del users_dic[chat_id]
+                bot.send_message(chat_id, text='המשתמש נמחק בהצלחה מעכשיו לא תקבל עדכוני רוח')
+
         else:
             bot.send_message(chat_id, text='אתה כבר רשום לשירות. למחיקת המשתמש תשלח את ההודעה: _delete_')
 
