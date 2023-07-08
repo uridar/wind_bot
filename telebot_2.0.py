@@ -1,16 +1,11 @@
-import datetime
 import db_libary
-import requests
-from bs4 import BeautifulSoup
-import time
 import re
 import telebot
-from telebot import TeleBot
 from telebot import types
 import mysql.connector
 from mysql.connector import Error
-BOT_TOKEN = "6108637814:AAFSs4JhYcgAD0IQ42rm61ttHS9WQ4ib0F4"
-
+import password_holder
+BOT_TOKEN = password_holder.wind_bot_token
 class User:
 
     chat_ids_ = []
@@ -33,32 +28,6 @@ staion_to_db = {'בת גלים כנסיה': 'bat_galim', 'בצת': 'bezet', "ש�
                     'כנרת בית צידה': 'beit_zida', 'כנרת מצוף טבחה': 'tabcha'}
 list_of_station = ['כנרת בית צידה', 'כנרת מגדל', 'בת גלים כנסיה', 'כנרת כפר נחום', 'כנרת מצוף טבחה', 'שרונה', 'בצת', 'נמל חדרה', 'עתלית המבצר', 'עכו', 'שבי ציון', 'שדות ים']
 list_of_golshim = []
-
-def db_update_del(chat_id):
-    # try to run the block of code
-    try:
-        # establishing the connection
-        conn = mysql.connector.connect(
-            user='root', password='Uri0524734764', host='127.0.0.1', database='windbot_db')
-        # open cursor, define and run query, fetch results
-        cursor = conn.cursor()
-        # Preparing SQL query to INSERT a record into the database.
-        sql = "DELETE FROM users" \
-              "WHERE id ='%s'"
-        staff = (chat_id,)
-            # Executing the SQL command
-        cursor.execute(sql, staff)
-            # Commit your changes in the database
-        conn.commit()
-             # close the cursor and database connection
-        cursor.close()
-
-        return True
-    # catch exception and print error message
-    except Error as err:
-        print('db_update_del - Error message: ' + err.msg)
-        return False
-
 
 sql = "SELECT id FROM users"
 users_dic = {}
@@ -117,7 +86,7 @@ def welcome(message):
         else:
             bot.send_message(chat_id, text='תשלח את תשובתך במספר לדוגמה: "14"')
 
-
+#
     elif user.user_stage == 4:
         if message.text == 'סיימתי':
             stations = set(user.station_to_get_update)
@@ -136,6 +105,8 @@ def welcome(message):
         elif message.text in list_of_station:
             user.station_to_get_update.append(message.text)
 
+
+#delete the user for windbot_db
     elif user.user_stage == 5:
         if message.text == '_delete_':
             if db_libary.delete_row_by_id(chat_id, table_name='users'):

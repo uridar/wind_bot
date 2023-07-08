@@ -1,27 +1,11 @@
 import mysql.connector
 from mysql.connector import Error
-
-class User:
-    chat_ids_ = []
-    golesh_count = 0
-
-    def __init__(self, user_stage, chat_id, first_name, wind_to_alert_knots, wind_to_alert_max, station_to_get_update, station_that_get_mes):
-        self.user_stage = user_stage
-        self.chat_id = chat_id
-        self.first_name = first_name
-        self.wind_to_alert_knots = wind_to_alert_knots
-        self.wind_to_alert_max = wind_to_alert_max
-        self.station_to_get_update = station_to_get_update
-        self.station_that_get_mes = station_that_get_mes
-        self.chat_ids_.append(chat_id)
-        User.golesh_count += 1
-
-
-
+import password_holder
+#function that get sql steatment and return a list of tuple of its varibales
 def db_get_s(sql):
     try:
         conn = mysql.connector.connect(
-            user='root', password='Uri0524734764', host='127.0.0.1', database='windbot_db'
+            user='root', password=password_holder.mysql, host='127.0.0.1', database='windbot_db'
         )
         cursor = conn.cursor()
         cursor.execute(sql)
@@ -39,10 +23,9 @@ def db_get_s(sql):
 def db_get(sql):
     try:
         conn = mysql.connector.connect(
-            user='root', password='Uri0524734764', host='127.0.0.1', database='windbot_db'
-        )
-        cursor = conn.cursor()
+            user='root', password=password_holder.mysql, host='127.0.0.1', database='windbot_db')
 
+        cursor = conn.cursor()
         cursor.execute(sql)
         result = cursor.fetchall()
         cursor.close()
@@ -58,13 +41,13 @@ def db_get(sql):
 
 
 
-
+#function that insert value and update them to the station_that_get_mes table
 def db_update_get_mes(chat_id, staion_name):
     # try to run the block of code
     try:
         # establishing the connection
         conn = mysql.connector.connect(
-            user='root', password='Uri0524734764', host='127.0.0.1', database='windbot_db')
+            user='root', password=password_holder.mysql, host='127.0.0.1', database='windbot_db')
         # open cursor, define and run query, fetch results
         cursor = conn.cursor()
         table_name = "station_get_mes"
@@ -80,7 +63,6 @@ def db_update_get_mes(chat_id, staion_name):
         conn.commit()
              # close the cursor and database connection
         cursor.close()
-
         return True
     # catch exception and print error message
     except Error as err:
@@ -88,13 +70,12 @@ def db_update_get_mes(chat_id, staion_name):
         return False
 
 
-
 ## insert new user to the users id
 def insert_numbers(user_id, user_name, station_list, wind_to_alert_knots, wind_to_alert_max):
     try:
         conn = mysql.connector.connect(
-            user='root', password='Uri0524734764', host='localhost', database='windbot_db'
-        )
+            user='root', password=password_holder.mysql, host='localhost', database='windbot_db')
+
         cursor = conn.cursor()
         station_list_max = []
         for station in station_list:
@@ -128,7 +109,7 @@ def delete_row_by_id(user_id, table_name):
     try:
         # establishing the connection
         conn = mysql.connector.connect(
-            user='root', password='Uri0524734764', host='127.0.0.1', database='windbot_db')
+            user='root', password=password_holder.mysql, host='127.0.0.1', database='windbot_db')
         # open cursor, define and run query, fetch results
 
 
