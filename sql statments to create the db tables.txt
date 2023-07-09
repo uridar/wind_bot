@@ -28,7 +28,7 @@ CREATE TABLE station_get_mes (
 
 staetment to create users
 
-CREATE TABLE station (
+CREATE TABLE users (
     id VARCHAR(100) UNIQUE,
     first_name VARCHAR(100),
     bat_galim INT,
