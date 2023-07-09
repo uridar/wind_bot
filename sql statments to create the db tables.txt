@@ -1,0 +1,58 @@
+
+staetment to create windbot_db
+
+CREATE DATABASE windbot;
+
+
+######## 
+staetment to create station_get_mes
+
+CREATE TABLE station_get_mes (
+    id VARCHAR(100) UNIQUE,
+    bat_galim TIMESTAMP,
+    bezet TIMESTAMP,
+    sdot_yam TIMESTAMP,
+    ako TIMESTAMP,
+    atlil TIMESTAMP,
+    shavie_zion TIMESTAMP,
+    hedera TIMESTAMP,
+    sarona TIMESTAMP,
+    migdal TIMESTAMP,
+    kfar_nahom TIMESTAMP,
+    beit_zida TIMESTAMP,
+    tabcha TIMESTAMP
+);
+
+
+############
+
+staetment to create users
+
+CREATE TABLE station (
+    id VARCHAR(100) UNIQUE,
+    first_name VARCHAR(100),
+    bat_galim INT,
+    bat_galim_max INT,
+    bezet INT,
+    bezet_max INT,
+    sdot_yam INT,
+    sdot_yam_max INT,
+    ako INT,
+    ako_max INT,
+    atlit INT,
+    atlit_max INT,
+    shavie_zion INT,
+    shavie_zion_max INT,
+    hedera INT,
+    hedera_max INT,
+    sarona INT,
+    sarona_max INT,
+    migdal INT,
+    migdal_max INT,
+    kfar_nahom INT,
+    kfar_nahom_max INT,
+    beit_zida INT,
+    beit_zida_max INT,
+    tabcha INT,
+    tabcha_max INT
+);
