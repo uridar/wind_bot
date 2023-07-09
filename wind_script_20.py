@@ -120,7 +120,7 @@ def main():
         for user in get_mes_data:
             counter = 0
             for timestamp in user:
-                if type(timestamp)==datetime.datetime and (datetime.datetime.now()-timestamp).seconds>=30:
+                if type(timestamp)==datetime.datetime and (datetime.datetime.now()-timestamp).seconds>=14400:
                     a=None
                     get_mes_data[users_counter][counter]= a
                 counter+=1
@@ -164,7 +164,7 @@ def main():
                     if db_libary.db_update_get_mes(chat_id, staion_to_db[location]):
                         send_telegram_message(chat_id, message)
         print('End code')
-        time.sleep(30)
+        time.sleep(180)
 
 while True:
     try:
